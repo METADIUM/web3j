@@ -36,6 +36,7 @@ ext {
 description 'Web3j base project.'
 
 [
+    'bintray',
     'jacoco',
     'java',
     'javadoc',
@@ -46,7 +47,7 @@ description 'Web3j base project.'
     download {
         src "https://raw.githubusercontent.com/web3j/build-tools/master/gradle/$buildScript/build.gradle"
         dest "$rootDir/gradle/$buildScript/build.gradle"
-        overwrite false
+        overwrite true
         quiet true
         onlyIfModified true
     }

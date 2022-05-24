@@ -12,7 +12,7 @@
  */
 package org.web3j.protocol.nodesmith;
 
-import java.util.Optional;
+import java8.util.Optional;
 
 import okhttp3.Headers;
 import org.junit.jupiter.api.Test;

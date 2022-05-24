@@ -8,4 +8,3 @@ dependencies {
             "net.sourceforge.streamsupport:streamsupport-cfuture:$streamsupportVersion"
 }
 
-useReducedJdk(project)

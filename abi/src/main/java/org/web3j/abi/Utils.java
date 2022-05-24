@@ -115,9 +115,10 @@ public class Utils {
     @SuppressWarnings("unchecked")
     public static List<TypeReference<Type>> convert(List<TypeReference<?>> input) {
         List<TypeReference<Type>> result = new ArrayList<>(input.size());
-        for (TypeReference<?> ref : input) {
-            result.add((TypeReference<Type>) ref);
-        }
+        result.addAll(
+                input.stream()
+                        .map(typeReference -> (TypeReference<Type>) typeReference)
+                        .collect(Collectors.toList()));
         return result;
     }
 

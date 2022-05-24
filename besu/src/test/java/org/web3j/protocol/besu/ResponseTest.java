@@ -15,7 +15,7 @@ package org.web3j.protocol.besu;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
+import java8.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
