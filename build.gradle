@@ -70,6 +70,8 @@ allprojects {
         useJUnitPlatform()
     }
 
+    tasks.withType(Javadoc).all { enabled = false }
+
     dependencies {
         testCompile "org.junit.jupiter:junit-jupiter:$junitVersion"
         testCompile "org.mockito:mockito-junit-jupiter:$mockitoJunitVersion"
