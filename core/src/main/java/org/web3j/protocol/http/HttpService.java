@@ -13,6 +13,7 @@
 package org.web3j.protocol.http;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -133,11 +134,15 @@ public class HttpService extends Service {
         this(DEFAULT_URL);
     }
 
-    private static OkHttpClient createOkHttpClient() {
+    public static OkHttpClient.Builder getOkHttpClientBuilder() {
         final OkHttpClient.Builder builder =
                 new OkHttpClient.Builder().connectionSpecs(CONNECTION_SPEC_LIST);
         configureLogging(builder);
-        return builder.build();
+        return builder;
+    }
+
+    private static OkHttpClient createOkHttpClient() {
+        return getOkHttpClientBuilder().build();
     }
 
     private static void configureLogging(OkHttpClient.Builder builder) {
@@ -157,20 +162,22 @@ public class HttpService extends Service {
         okhttp3.Request httpRequest =
                 new okhttp3.Request.Builder().url(url).headers(headers).post(requestBody).build();
 
-        okhttp3.Response response = httpClient.newCall(httpRequest).execute();
-        processHeaders(response.headers());
-        ResponseBody responseBody = response.body();
-        if (response.isSuccessful()) {
-            if (responseBody != null) {
-                return buildInputStream(responseBody);
+        try (okhttp3.Response response = httpClient.newCall(httpRequest).execute()) {
+            processHeaders(response.headers());
+            ResponseBody responseBody = response.body();
+            if (response.isSuccessful()) {
+                if (responseBody != null) {
+                    return buildInputStream(responseBody);
+                } else {
+                    return null;
+                }
             } else {
-                return null;
-            }
-        } else {
-            int code = response.code();
-            String text = responseBody == null ? "N/A" : responseBody.string();
+                int code = response.code();
+                String text = responseBody == null ? "N/A" : responseBody.string();
 
-            throw new ClientConnectionException("Invalid response received: " + code + "; " + text);
+                throw new ClientConnectionException(
+                        "Invalid response received: " + code + "; " + text);
+            }
         }
     }
 
@@ -179,15 +186,13 @@ public class HttpService extends Service {
     }
 
     private InputStream buildInputStream(ResponseBody responseBody) throws IOException {
-        InputStream inputStream = responseBody.byteStream();
-
         if (includeRawResponse) {
             // we have to buffer the entire input payload, so that after processing
             // it can be re-read and used to populate the rawResponse field.
 
             BufferedSource source = responseBody.source();
             source.request(Long.MAX_VALUE); // Buffer the entire body
-            Buffer buffer = source.buffer();
+            Buffer buffer = source.getBuffer();
 
             long size = buffer.size();
             if (size > Integer.MAX_VALUE) {
@@ -196,6 +201,8 @@ public class HttpService extends Service {
             }
 
             int bufferSize = (int) size;
+            InputStream inputStream = responseBody.byteStream();
+
             BufferedInputStream bufferedinputStream =
                     new BufferedInputStream(inputStream, bufferSize);
 
@@ -203,7 +210,7 @@ public class HttpService extends Service {
             return bufferedinputStream;
 
         } else {
-            return inputStream;
+            return new ByteArrayInputStream(responseBody.bytes());
         }
     }
 

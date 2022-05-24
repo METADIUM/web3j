@@ -37,6 +37,7 @@ import org.web3j.protocol.besu.response.privacy.PrivFindPrivacyGroup;
 import org.web3j.protocol.besu.response.privacy.PrivGetPrivacyPrecompileAddress;
 import org.web3j.protocol.besu.response.privacy.PrivGetPrivateTransaction;
 import org.web3j.protocol.besu.response.privacy.PrivGetTransactionReceipt;
+import org.web3j.protocol.besu.response.privacy.PrivateEnclaveKey;
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Request;
@@ -63,6 +64,7 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
 
     private final JsonRpc2_0BesuRx besuRx;
     private final long blockTime;
+    private final OnChainPrivacyTransactionBuilder onChainPrivacyTransactionBuilder;
 
     public JsonRpc2_0Besu(final Web3jService web3jService) {
         this(web3jService, DEFAULT_BLOCK_TIME, Async.defaultExecutorService());
@@ -72,9 +74,23 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
             Web3jService web3jService,
             long pollingInterval,
             ScheduledExecutorService scheduledExecutorService) {
+        this(
+                web3jService,
+                pollingInterval,
+                scheduledExecutorService,
+                new OnChainPrivacyTransactionBuilder());
+    }
+
+    public JsonRpc2_0Besu(
+            Web3jService web3jService,
+            long pollingInterval,
+            ScheduledExecutorService scheduledExecutorService,
+            OnChainPrivacyTransactionBuilder onChainPrivacyTransactionBuilder) {
         super(web3jService, pollingInterval, scheduledExecutorService);
+
         this.besuRx = new JsonRpc2_0BesuRx(this, scheduledExecutorService);
         this.blockTime = pollingInterval;
+        this.onChainPrivacyTransactionBuilder = onChainPrivacyTransactionBuilder;
     }
 
     @Override
@@ -215,6 +231,16 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
     }
 
     @Override
+    public Request<?, PrivateEnclaveKey> privDistributeRawTransaction(
+            final String signedTransactionData) {
+        return new Request<>(
+                "priv_distributeRawTransaction",
+                Collections.singletonList(signedTransactionData),
+                web3jService,
+                PrivateEnclaveKey.class);
+    }
+
+    @Override
     public Request<?, PrivGetPrivacyPrecompileAddress> privGetPrivacyPrecompileAddress() {
         return new Request<>(
                 "priv_getPrivacyPrecompileAddress",
@@ -250,7 +276,7 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
                         lock ? "lock" : "unlock");
 
         String lockPrivacyGroupTransactionPayload =
-                OnChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
+                onChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
                         privacyGroupId,
                         credentials,
                         enclaveKey,
@@ -276,7 +302,7 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
                 OnChainPrivacyTransactionBuilder.getEncodedSingleParamFunction("lock");
 
         String lockPrivacyGroupTransactionPayload =
-                OnChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
+                onChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
                         privacyGroupId,
                         credentials,
                         enclaveKey,
@@ -316,11 +342,10 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
                         .send()
                         .getTransactionCount();
         String addToContractCall =
-                OnChainPrivacyTransactionBuilder.getEncodedAddToGroupFunction(
-                        enclaveKey, participantsAsBytes);
+                OnChainPrivacyTransactionBuilder.getEncodedAddToGroupFunction(participantsAsBytes);
 
         String addToPrivacyGroupTransactionPayload =
-                OnChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
+                onChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
                         privacyGroupId,
                         credentials,
                         enclaveKey,
@@ -345,15 +370,15 @@ public class JsonRpc2_0Besu extends JsonRpc2_0Eea implements Besu {
                 OnChainPrivacyTransactionBuilder.getEncodedRemoveFromGroupFunction(
                         enclaveKey, participant.raw());
 
-        String removeFromProupTransactionPayload =
-                OnChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
+        String removeFromGroupTransactionPayload =
+                onChainPrivacyTransactionBuilder.buildOnChainPrivateTransaction(
                         privacyGroupId,
                         credentials,
                         enclaveKey,
                         transactionCount,
                         removeFromContractCall);
 
-        return eeaSendRawTransaction(removeFromProupTransactionPayload);
+        return eeaSendRawTransaction(removeFromGroupTransactionPayload);
     }
 
     @Override

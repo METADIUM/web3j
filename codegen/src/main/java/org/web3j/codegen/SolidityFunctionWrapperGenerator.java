@@ -40,7 +40,7 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
     public static final String COMMAND_PREFIX = COMMAND_SOLIDITY + " " + COMMAND_GENERATE;
 
     /*
-     * Usage: solidity generate [-hV] [-jt] [-st] -a=<abiFile> [-b=<binFile>]
+     * Usage: solidity generate [-hV] [-jt] [-st] [-B] -a=<abiFile> [-b=<binFile>]
      * -o=<destinationFileDir> -p=<packageName>
      * -h, --help                 Show this help message and exit.
      * -V, --version              Print version information and exit.
@@ -54,6 +54,7 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
      * -jt, --javaTypes       use native java types.
      * Default: true
      * -st, --solidityTypes   use solidity types.
+     * -B, --generateBoth     generate both call and send functions.
      */
 
     private final File binFile;
@@ -63,9 +64,9 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
 
     private final int addressLength;
 
-    private final boolean generateSendTxForCalls;
+    private final boolean generateBothCallAndSend;
 
-    protected SolidityFunctionWrapperGenerator(
+    public SolidityFunctionWrapperGenerator(
             File binFile,
             File abiFile,
             File destinationDir,
@@ -96,7 +97,7 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
             String basePackageName,
             boolean useJavaNativeTypes,
             boolean useJavaPrimitiveTypes,
-            boolean generateSendTxForCalls,
+            boolean generateBothCallAndSend,
             Class<? extends Contract> contractClass,
             int addressLength) {
 
@@ -111,7 +112,7 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
         this.abiFile = abiFile;
         this.contractName = contractName;
         this.addressLength = addressLength;
-        this.generateSendTxForCalls = generateSendTxForCalls;
+        this.generateBothCallAndSend = generateBothCallAndSend;
     }
 
     protected List<AbiDefinition> loadContractDefinition(File absFile) throws IOException {
@@ -128,16 +129,15 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
         }
         List<AbiDefinition> functionDefinitions = loadContractDefinition(abiFile);
 
-        if (functionDefinitions.isEmpty()) {
-            exitError("Unable to parse input ABI file");
-        } else {
+        if (!functionDefinitions.isEmpty()) {
+
             String className = Strings.capitaliseFirstLetter(contractName);
             System.out.print("Generating " + basePackageName + "." + className + " ... ");
 
             new SolidityFunctionWrapper(
                             useJavaNativeTypes,
                             useJavaPrimitiveTypes,
-                            generateSendTxForCalls,
+                            generateBothCallAndSend,
                             addressLength)
                     .generateJavaFiles(
                             contractClass,
@@ -149,6 +149,8 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
                             null);
 
             System.out.println("File written to " + destinationDirLocation.toString() + "\n");
+        } else {
+            System.out.println("Ignoring empty ABI file: " + abiFile.getName() + ".abi" + "\n");
         }
     }
 
@@ -227,6 +229,12 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
                 required = false)
         private boolean primitiveTypes = false;
 
+        @Option(
+                names = {"-B", "--generateBoth"},
+                description = "generate both call and send functions.",
+                required = false)
+        private boolean generateBothCallAndSend;
+
         @Override
         public void run() {
             try {
@@ -246,6 +254,8 @@ public class SolidityFunctionWrapperGenerator extends FunctionWrapperGenerator {
                                 packageName,
                                 useJavaTypes,
                                 primitiveTypes,
+                                generateBothCallAndSend,
+                                Contract.class,
                                 addressLength)
                         .generate();
             } catch (Exception e) {
