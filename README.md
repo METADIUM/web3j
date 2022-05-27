@@ -13,8 +13,7 @@ In web3j, Android API 23 is supported up to 4.6.0, and in 4.8.8 and 11, it is su
 Accordingly, this is a project to support version 4.8.8 up to Android API 23.
 
 
-## Usage 
-Jit
+## Usage
 
 Maven
 -----
