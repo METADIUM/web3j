@@ -15,6 +15,7 @@ package org.web3j.ens;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.IDN;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.web3j.compat.Compat;

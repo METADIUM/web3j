@@ -783,7 +783,7 @@ public abstract class Contract extends ManagedTransaction {
 
     protected static List<EventValuesWithLog> staticExtractEventParametersWithLog(
             Event event, TransactionReceipt transactionReceipt) {
-        return transactionReceipt.getLogs().stream()
+        return StreamSupport.stream(transactionReceipt.getLogs())
                 .map(log -> staticExtractEventParametersWithLog(event, log))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
