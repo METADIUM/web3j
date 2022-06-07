@@ -132,6 +132,12 @@ public class Transaction {
         return new Transaction(from, nonce, gasPrice, gasLimit, to, null, data);
     }
 
+    public static Transaction createEthCallTransaction(
+            String from, String to, String data, BigInteger weiValue) {
+
+        return new Transaction(from, null, null, null, to, weiValue, data);
+    }
+
     public static Transaction createEthCallTransaction(String from, String to, String data) {
 
         return new Transaction(from, null, null, null, to, null, data);
@@ -165,16 +171,20 @@ public class Transaction {
         return convert(nonce);
     }
 
-    public Long getChainId() {
-        return chainId;
+    public String getChainId() {
+        if (chainId != null) {
+            return convert(BigInteger.valueOf(chainId));
+        } else {
+            return null;
+        }
     }
 
-    public BigInteger getMaxPriorityFeePerGas() {
-        return maxPriorityFeePerGas;
+    public String getMaxPriorityFeePerGas() {
+        return convert(maxPriorityFeePerGas);
     }
 
-    public BigInteger getMaxFeePerGas() {
-        return maxFeePerGas;
+    public String getMaxFeePerGas() {
+        return convert(maxFeePerGas);
     }
 
     private static String convert(BigInteger value) {

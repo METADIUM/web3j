@@ -42,6 +42,7 @@ import org.web3j.protocol.core.methods.response.EthCompileLLL;
 import org.web3j.protocol.core.methods.response.EthCompileSerpent;
 import org.web3j.protocol.core.methods.response.EthCompileSolidity;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
+import org.web3j.protocol.core.methods.response.EthFeeHistory;
 import org.web3j.protocol.core.methods.response.EthFilter;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
@@ -57,6 +58,7 @@ import org.web3j.protocol.core.methods.response.EthGetUncleCountByBlockNumber;
 import org.web3j.protocol.core.methods.response.EthGetWork;
 import org.web3j.protocol.core.methods.response.EthHashrate;
 import org.web3j.protocol.core.methods.response.EthLog;
+import org.web3j.protocol.core.methods.response.EthMaxPriorityFeePerGas;
 import org.web3j.protocol.core.methods.response.EthMining;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 import org.web3j.protocol.core.methods.response.EthSign;
@@ -219,6 +221,25 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, EthGasPrice> ethGasPrice() {
         return new Request<>(
                 "eth_gasPrice", Collections.<String>emptyList(), web3jService, EthGasPrice.class);
+    }
+
+    @Override
+    public Request<?, EthMaxPriorityFeePerGas> ethMaxPriorityFeePerGas() {
+        return new Request<>(
+                "eth_maxPriorityFeePerGas",
+                Collections.<String>emptyList(),
+                web3jService,
+                EthMaxPriorityFeePerGas.class);
+    }
+
+    @Override
+    public Request<?, EthFeeHistory> ethFeeHistory(
+            int blockCount, DefaultBlockParameter newestBlock, List<Double> rewardPercentiles) {
+        return new Request<>(
+                "eth_feeHistory",
+                Arrays.asList(blockCount, newestBlock.getValue(), rewardPercentiles),
+                web3jService,
+                EthFeeHistory.class);
     }
 
     @Override
@@ -504,7 +525,7 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, EthUninstallFilter> ethUninstallFilter(BigInteger filterId) {
         return new Request<>(
                 "eth_uninstallFilter",
-                Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
+                Arrays.asList(Numeric.toHexStringWithPrefix(filterId)),
                 web3jService,
                 EthUninstallFilter.class);
     }
@@ -513,7 +534,7 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, EthLog> ethGetFilterChanges(BigInteger filterId) {
         return new Request<>(
                 "eth_getFilterChanges",
-                Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
+                Arrays.asList(Numeric.toHexStringWithPrefix(filterId)),
                 web3jService,
                 EthLog.class);
     }
@@ -522,7 +543,7 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, EthLog> ethGetFilterLogs(BigInteger filterId) {
         return new Request<>(
                 "eth_getFilterLogs",
-                Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
+                Arrays.asList(Numeric.toHexStringWithPrefix(filterId)),
                 web3jService,
                 EthLog.class);
     }
@@ -650,7 +671,7 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, ShhUninstallFilter> shhUninstallFilter(BigInteger filterId) {
         return new Request<>(
                 "shh_uninstallFilter",
-                Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
+                Arrays.asList(Numeric.toHexStringWithPrefix(filterId)),
                 web3jService,
                 ShhUninstallFilter.class);
     }
@@ -659,7 +680,7 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, ShhMessages> shhGetFilterChanges(BigInteger filterId) {
         return new Request<>(
                 "shh_getFilterChanges",
-                Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
+                Arrays.asList(Numeric.toHexStringWithPrefix(filterId)),
                 web3jService,
                 ShhMessages.class);
     }
@@ -668,7 +689,7 @@ public class JsonRpc2_0Web3j implements Web3j {
     public Request<?, ShhMessages> shhGetMessages(BigInteger filterId) {
         return new Request<>(
                 "shh_getMessages",
-                Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
+                Arrays.asList(Numeric.toHexStringWithPrefix(filterId)),
                 web3jService,
                 ShhMessages.class);
     }

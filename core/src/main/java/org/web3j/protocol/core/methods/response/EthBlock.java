@@ -342,12 +342,16 @@ public class EthBlock extends Response<EthBlock.Block> {
             this.sealFields = sealFields;
         }
 
-        public String getBaseFeePerGas() {
-            return baseFeePerGas;
+        public BigInteger getBaseFeePerGas() {
+            return Numeric.decodeQuantity(baseFeePerGas);
         }
 
         public void setBaseFeePerGas(String baseFeePerGas) {
             this.baseFeePerGas = baseFeePerGas;
+        }
+
+        public String getBaseFeePerGasRaw() {
+            return baseFeePerGas;
         }
 
         @Override
@@ -465,9 +469,9 @@ public class EthBlock extends Response<EthBlock.Block> {
                 return false;
             }
 
-            if (getBaseFeePerGas() != null
-                    ? !getBaseFeePerGas().equals(block.getBaseFeePerGas())
-                    : block.getBaseFeePerGas() != null) {
+            if (getBaseFeePerGasRaw() != null
+                    ? !getBaseFeePerGasRaw().equals(block.getBaseFeePerGasRaw())
+                    : block.getBaseFeePerGasRaw() != null) {
                 return false;
             }
 
@@ -508,7 +512,11 @@ public class EthBlock extends Response<EthBlock.Block> {
             result = 31 * result + (getTransactions() != null ? getTransactions().hashCode() : 0);
             result = 31 * result + (getUncles() != null ? getUncles().hashCode() : 0);
             result = 31 * result + (getSealFields() != null ? getSealFields().hashCode() : 0);
-            result = 31 * result + (getBaseFeePerGas() != null ? getBaseFeePerGas().hashCode() : 0);
+            result =
+                    31 * result
+                            + (getBaseFeePerGasRaw() != null
+                                    ? getBaseFeePerGasRaw().hashCode()
+                                    : 0);
             return result;
         }
     }
@@ -559,6 +567,8 @@ public class EthBlock extends Response<EthBlock.Block> {
             implements TransactionResult<Transaction> {
         public TransactionObject() {}
 
+        /** Use constructor with ChainId */
+        @Deprecated
         public TransactionObject(
                 String hash,
                 String nonce,
@@ -576,7 +586,7 @@ public class EthBlock extends Response<EthBlock.Block> {
                 String raw,
                 String r,
                 String s,
-                int v,
+                long v,
                 String type,
                 String maxFeePerGas,
                 String maxPriorityFeePerGas,
@@ -586,6 +596,54 @@ public class EthBlock extends Response<EthBlock.Block> {
                     nonce,
                     blockHash,
                     blockNumber,
+                    transactionIndex,
+                    from,
+                    to,
+                    value,
+                    gas,
+                    gasPrice,
+                    input,
+                    creates,
+                    publicKey,
+                    raw,
+                    r,
+                    s,
+                    v,
+                    type,
+                    maxFeePerGas,
+                    maxPriorityFeePerGas,
+                    accessList);
+        }
+
+        public TransactionObject(
+                String hash,
+                String nonce,
+                String blockHash,
+                String blockNumber,
+                String chainId,
+                String transactionIndex,
+                String from,
+                String to,
+                String value,
+                String gasPrice,
+                String gas,
+                String input,
+                String creates,
+                String publicKey,
+                String raw,
+                String r,
+                String s,
+                long v,
+                String type,
+                String maxFeePerGas,
+                String maxPriorityFeePerGas,
+                List<AccessListObject> accessList) {
+            super(
+                    hash,
+                    nonce,
+                    blockHash,
+                    blockNumber,
+                    chainId,
                     transactionIndex,
                     from,
                     to,

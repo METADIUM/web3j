@@ -15,7 +15,6 @@ package org.web3j.utils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.web3j.exceptions.MessageDecodingException;
@@ -24,6 +23,7 @@ import org.web3j.exceptions.MessageEncodingException;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.web3j.utils.Numeric.asByte;
@@ -60,8 +60,8 @@ public class NumericTest {
     @Test
     public void testQuantityDecode() {
         assertEquals(Numeric.decodeQuantity("0x0"), (BigInteger.valueOf(0L)));
-        assertEquals(Numeric.decodeQuantity("0x400"), (BigInteger.valueOf((1024L))));
-        assertEquals(Numeric.decodeQuantity("0x0"), (BigInteger.valueOf((0L))));
+        assertEquals(Numeric.decodeQuantity("0x400"), (BigInteger.valueOf(1024L)));
+        assertEquals(Numeric.decodeQuantity("0x41"), (BigInteger.valueOf(65L)));
         assertEquals(
                 Numeric.decodeQuantity("0x7fffffffffffffff"),
                 (BigInteger.valueOf((Long.MAX_VALUE))));
@@ -72,13 +72,10 @@ public class NumericTest {
 
     @Test
     public void testQuantityDecodeLeadingZero() {
-        assertEquals(Numeric.decodeQuantity("0x0400"), (BigInteger.valueOf(1024L)));
-        assertEquals(Numeric.decodeQuantity("0x001"), (BigInteger.valueOf(1L)));
+        assertThrows(MessageDecodingException.class, () -> Numeric.decodeQuantity("0x0400"));
+        assertThrows(MessageDecodingException.class, () -> Numeric.decodeQuantity("0x001"));
     }
 
-    // If TestRpc resolves the following issue, we can reinstate this code
-    // https://github.com/ethereumjs/testrpc/issues/220
-    @Disabled
     @Test
     public void testQuantityDecodeLeadingZeroException() {
 
@@ -141,6 +138,9 @@ public class NumericTest {
     @Test
     public void testToHexStringWithPrefix() {
         assertEquals(Numeric.toHexStringWithPrefix(BigInteger.TEN), ("0xa"));
+        assertEquals(Numeric.toHexStringWithPrefix(BigInteger.valueOf(1024)), ("0x400"));
+        assertEquals(Numeric.toHexStringWithPrefix(BigInteger.valueOf(65)), ("0x41"));
+        assertEquals(Numeric.toHexStringWithPrefix(BigInteger.valueOf(0)), ("0x0"));
     }
 
     @Test
@@ -256,5 +256,27 @@ public class NumericTest {
     public void testHandleNPE() {
         assertFalse(Numeric.containsHexPrefix(null));
         assertFalse(Numeric.containsHexPrefix(""));
+    }
+
+    @Test
+    void removeDoubleQuotes() {
+        String text = "Some text";
+        String textWithQuotes = "\"Some text\"";
+
+        assertEquals(text, Numeric.removeDoubleQuotes(textWithQuotes));
+    }
+
+    @Test
+    void removeDoubleQuotesWhenStrNull() {
+        assertNull(Numeric.removeDoubleQuotes(null));
+    }
+
+    @Test
+    void removeDoubleQuotesWhenStrEmpty() {
+        String text = "Some text";
+
+        assertEquals("", Numeric.removeDoubleQuotes(""));
+        assertEquals(" ", Numeric.removeDoubleQuotes(" "));
+        assertEquals(text, Numeric.removeDoubleQuotes(text));
     }
 }

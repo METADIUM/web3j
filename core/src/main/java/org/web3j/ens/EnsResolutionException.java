@@ -13,9 +13,13 @@
 package org.web3j.ens;
 
 /** ENS resolution exception. */
-public class EnsResolutionException extends RuntimeException {
+public class EnsResolutionException extends EnsException {
     public EnsResolutionException(String message) {
         super(message);
+    }
+
+    public EnsResolutionException(Throwable cause) {
+        super(cause);
     }
 
     public EnsResolutionException(String message, Throwable cause) {
