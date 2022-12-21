@@ -338,6 +338,7 @@ public class Transaction {
     }
 
     public BigInteger getMaxFeePerGas() {
+        if (maxFeePerGas == null) return null;
         return Numeric.decodeQuantity(maxFeePerGas);
     }
 

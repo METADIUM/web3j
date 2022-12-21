@@ -89,8 +89,8 @@ public class AbiDefinition {
         return StateMutability.isPure(stateMutability);
     }
 
-    public void setConstant(boolean constant) {
-        this.stateMutability = StateMutability.PURE.getName();
+    public void setConstant(boolean isConstant) {
+        if (isConstant) this.stateMutability = StateMutability.PURE.getName();
     }
 
     public boolean isPureOrView() {
@@ -285,7 +285,7 @@ public class AbiDefinition {
         }
 
         public int nestedness() {
-            if (getComponents().size() == 0) {
+            if (getComponents().isEmpty()) {
                 return 0;
             }
             return 1
